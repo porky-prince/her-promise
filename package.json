@@ -1,0 +1,44 @@
+{
+  "name": "her-promise",
+  "version": "0.0.1",
+  "description": "This is a polyfill of the ES6 Promise.",
+  "keywords": [
+    "promise"
+  ],
+  "author": "PorkyKe",
+  "license": "MIT",
+  "scripts": {
+    "lint:prettier": "prettier \"{**/*,*}.{js,ts,json,md}\" -l",
+    "lint:code": "eslint --cache \"{**/*,*}.{js,ts}\"",
+    "lint": "npm-run-all -l -p \"lint:**\"",
+    "pretest": "npm run lint",
+    "commitlint": "commitlint --from=master",
+    "start": "npm run build -- -w",
+    "build": "tsc -p . --outDir dist",
+    "test": "jest --transform={\\\"^.+\\\\.tsx?$\\\":\\\"ts-jest\\\"}"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-prettier": "latest",
+    "eslint-plugin-import": "latest",
+    "eslint-config-xo": "latest",
+    "eslint-config-xo-typescript": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "prettier": "latest",
+    "husky": "latest",
+    "lint-staged": "latest",
+    "@commitlint/cli": "latest",
+    "@commitlint/config-conventional": "latest",
+    "npm-run-all": "latest",
+    "typescript": "latest",
+    "jest": "latest",
+    "@types/jest": "latest",
+    "ts-jest": "latest"
+  },
+  "repository": "https://github.com/porky-prince/her-promise.git",
+  "homepage": "https://github.com/porky-prince/her-promise#readme",
+  "bugs": "https://github.com/porky-prince/her-promise/issues"
+}
