@@ -1,5 +1,5 @@
 module.exports = {
-	extends: ['xo', 'xo-typescript', 'prettier/@typescript-eslint'],
+	extends: ['xo', 'xo-typescript'],
 	env: {
 		node: true,
 		browser: true,

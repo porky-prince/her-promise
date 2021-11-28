@@ -6,10 +6,7 @@
 
 > This is a polyfill of the ES6 Promise.
 
-
 ## Install
-
-
 
 ### Browser
 
@@ -17,12 +14,9 @@
 <script src="herPromise.js"></script>
 ```
 
-
 ## Usage
 
 ### Using in code
-
-
 
 #### Using in browser
 
@@ -31,9 +25,6 @@
 	herPromise('args');
 </script>
 ```
-
-
-
 
 ## License
 
