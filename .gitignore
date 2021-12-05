@@ -38,3 +38,5 @@ coverage
 .yo-repository
 
 # custom
+build
+dist

@@ -11,10 +11,11 @@
 		"lint:prettier": "prettier \"{**/*,*}.{js,ts,json,md}\" -l",
 		"lint:code": "eslint --cache \"{**/*,*}.ts\"",
 		"lint": "npm-run-all -l -p \"lint:**\"",
-		"pretest": "npm run lint",
+		"pretest": "echo \"npm run lint\"",
 		"commitlint": "commitlint --from=master",
 		"start": "npm run build -- -w",
 		"build": "tsc -p . --outDir dist",
+		"compile": "gulp compile",
 		"test": "jest --transform={\\\"^.+\\\\.tsx?$\\\":\\\"ts-jest\\\"}",
 		"demo": "node test/demo.js"
 	},
@@ -24,6 +25,8 @@
 	"devDependencies": {
 		"@commitlint/cli": "^15.0.0",
 		"@commitlint/config-conventional": "^15.0.0",
+		"@rollup/plugin-commonjs": "^21.0.1",
+		"@rollup/plugin-node-resolve": "^13.0.6",
 		"@rollup/plugin-typescript": "^8.3.0",
 		"@types/jest": "^27.0.3",
 		"@types/node": "^16.11.10",
@@ -41,6 +44,7 @@
 		"lint-staged": "^12.1.2",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^2.5.0",
+		"promises-aplus-tests": "^2.1.2",
 		"rollup": "^2.60.1",
 		"ts-jest": "^27.0.7",
 		"typescript": "^4.5.2"
