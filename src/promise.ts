@@ -1,11 +1,3 @@
-// Remove global Promise
-if (typeof window === 'object') {
-	window.Promise = undefined;
-}
-if (typeof global === 'object') {
-	global.Promise = undefined;
-}
-
 import callLate from 'calllate';
 
 /**
@@ -119,7 +111,7 @@ function onPromiseValue<T, U>(
 	}
 }
 
-export default class Promise<T> {
+export class Promise<T> {
 	// When pending, a promise: may transition to either the fulfilled or rejected state.
 	private _state: string = Pending;
 	private _value: T | PromiseLike<T> = undefined;

@@ -1,4 +1,4 @@
-import Promise from '../src/promise';
+import { Promise } from '../src/promise';
 
 function delay<T>(time: number = 0, args?: T, isReject: boolean = false): Promise<T> {
 	return new Promise((resolve, reject) => {
