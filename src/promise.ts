@@ -147,7 +147,7 @@ export class Promise<T> {
 				this._reason = reason;
 				const length = rejects.length;
 				if (length === 0) {
-					console.warn('Uncaught (in promise) ' + reason);
+					// console.warn('Uncaught (in promise) ' + reason);
 					return;
 				}
 				for (let i = 0; i < length; ++i) {

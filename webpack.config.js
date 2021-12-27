@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const BuildDir = path.join(__dirname, 'build');
 
 module.exports = {
 	mode: 'development',
@@ -8,7 +9,7 @@ module.exports = {
 		app: './src/index.ts',
 	},
 	output: {
-		path: path.join(__dirname, 'build'),
+		path: BuildDir,
 		filename: 'her-promise.js',
 	},
 	module: {
