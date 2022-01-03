@@ -30,98 +30,97 @@ function onThen<T>(
 	args: any,
 	p: Promise<T>,
 	resolve: IResolve<T>,
+	reject: IReject,
+	noFunc: IResolve<T> | IReject
+): void {
+	if (!isFunc(func)) {
+		// If onFulfilled is not a function, it must be ignored.
+		// If onRejected is not a function, it must be ignored.
+		noFunc(args);
+		return;
+	}
+	let arg;
+	try {
+		arg = func(args);
+	} catch (err: any) {
+		reject(err);
+		return;
+	}
+	if (arg === p) {
+		reject(new TypeError('Chaining cycle detected for promise #<Promise>'));
+		return;
+	}
+	callThen<T>(arg, resolve, reject);
+}
+
+function tryThen<T>(
+	then: Function,
+	arg: T | PromiseLike<T>,
+	resolve: IResolve<T>,
 	reject: IReject
 ): void {
 	callLate(() => {
-		let arg;
+		let once: boolean = false;
 		try {
-			arg = func(args);
+			then.call(
+				arg,
+				(value: T) => {
+					if (once) {
+						return;
+					}
+					once = true;
+					callThen(value, resolve, reject);
+				},
+				(reason: any) => {
+					if (once) {
+						return;
+					}
+					once = true;
+					reject(reason);
+				}
+			);
+		} catch (err: any) {
+			if (!once) {
+				once = true;
+				reject(err);
+			}
+		}
+	});
+}
+
+function callThen<T>(arg: T | PromiseLike<T>, resolve: IResolve<T>, reject: IReject): void {
+	if (isObjOrFunc(arg)) {
+		let then;
+		try {
+			// If retrieving the property x.then results in a thrown exception e, reject promise with e as the reason.
+			then = (arg as PromiseLike<T>).then;
 		} catch (err: any) {
 			reject(err);
 			return;
 		}
-		if (arg === p) {
-			reject(new TypeError('Chaining cycle detected for promise #<Promise>'));
-			return;
-		}
-		if (isObjOrFunc(arg)) {
-			let then;
-			try {
-				then = arg.then;
-			} catch (err: any) {
-				reject(err);
-				return;
-			}
-			if (isFunc(then)) {
-				then.call(arg, resolve, reject);
-				return;
-			}
-		}
-		resolve(arg);
-	});
-}
-
-function onPromiseValue<T, U>(
-	value: T | PromiseLike<T>,
-	onFulfilled: Function,
-	onRejected: Function,
-	p: Promise<U>,
-	resolve: IResolve<T | U>,
-	reject: IReject
-): void {
-	if (isObjOrFunc(value)) {
-		let then;
-		try {
-			then = (value as PromiseLike<T>).then;
-		} catch (err: any) {
-			if (isFunc(onRejected)) {
-				onThen(onRejected, err, p, resolve, reject);
-			} else {
-				// If onRejected is not a function, it must be ignored.
-				reject(err);
-			}
-			return;
-		}
 		if (isFunc(then)) {
-			then.call(
-				value,
-				value => {
-					if (isFunc(onFulfilled)) {
-						onThen(onFulfilled, value, p, resolve, reject);
-					} else {
-						resolve(value);
-					}
-				},
-				reason => {
-					if (isFunc(onRejected)) {
-						onThen(onRejected, reason, p, resolve, reject);
-					} else {
-						reject(reason);
-					}
-				}
-			);
+			if (arg instanceof Promise) {
+				then.call(arg, resolve, reject);
+			} else {
+				tryThen(then, arg, resolve, reject);
+			}
 			return;
 		}
 	}
-	if (isFunc(onFulfilled)) {
-		onThen(onFulfilled, value, p, resolve, reject);
-	} else {
-		// If onFulfilled is not a function, it must be ignored.
-		resolve(value);
-	}
+	resolve(arg);
 }
 
 export class Promise<T> {
 	// When pending, a promise: may transition to either the fulfilled or rejected state.
 	private _state: string = Pending;
-	private _value: T | PromiseLike<T> = undefined;
+	private _value: T = undefined;
 	private _reason: any = undefined;
 	private _resolves: Function[] = [];
 	private _rejects: Function[] = [];
 
 	constructor(executor: (resolve: IResolve<T>, reject: IReject) => void) {
 		const resolves = this._resolves;
-		const resolve: IResolve<T> = (value?: T | PromiseLike<T>): void => {
+		const resolve: IResolve<T> = (value?: T): void => {
 			// When fulfilled, a promise: must not transition to any other state.
 			if (this._state === Pending) {
 				// Must have a value, which must not change.
@@ -158,7 +157,9 @@ export class Promise<T> {
 		};
 
 		try {
-			executor(resolve, reject);
+			executor((value?: T | PromiseLike<T>): void => {
+				callThen<T>(value, resolve, reject);
+			}, reject);
 		} catch (err: any) {
 			reject(err);
 		}
@@ -180,32 +181,26 @@ export class Promise<T> {
 		const p = new Promise<TResult1 | TResult2>((resolve, reject) => {
 			switch (this._state) {
 				case Fulfilled:
-					onPromiseValue<T, TResult1 | TResult2>(
-						this._value,
-						onFulfilled,
-						onRejected,
-						p,
-						resolve,
-						reject
-					);
+					callLate(() => {
+						onThen(onFulfilled, this._value, p, resolve, reject, resolve);
+					});
 					break;
 				case Rejected:
-					onThen(onRejected, this._reason, p, resolve, reject);
+					callLate(() => {
+						onThen(onRejected, this._reason, p, resolve, reject, reject);
+					});
 					break;
 				default:
 					this._resolves.push(() => {
-						onPromiseValue<T, TResult1 | TResult2>(
-							this._value,
-							onFulfilled,
-							onRejected,
-							p,
-							resolve,
-							reject
-						);
+						callLate(() => {
+							onThen(onFulfilled, this._value, p, resolve, reject, resolve);
+						});
 					});
 
 					this._rejects.push(() => {
-						onThen(onRejected, this._reason, p, resolve, reject);
+						callLate(() => {
+							onThen(onRejected, this._reason, p, resolve, reject, reject);
+						});
 					});
 					break;
 			}

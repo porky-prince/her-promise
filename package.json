@@ -5,7 +5,7 @@
 	"keywords": [
 		"promise"
 	],
-	"author": "PorkyKe",
+	"author": "Porky Ke",
 	"license": "MIT",
 	"scripts": {
 		"lint:prettier": "prettier \"{**/*,*}.{js,ts,json,md}\" -l",
@@ -19,7 +19,7 @@
 		"test:base": "promises-aplus-tests test/base.js",
 		"test:log": "promises-aplus-tests test/base.js > test.log",
 		"test:demo": "node test/demo.js",
-		"test": "jest --transform={\\\"^.+\\\\.tsx?$\\\":\\\"ts-jest\\\"}"
+		"test": "jest --transform={\\\"^.+\\\\.test\\\\.tsx?$\\\":\\\"ts-jest\\\"}"
 	},
 	"dependencies": {
 		"calllate": "^1.0.3"

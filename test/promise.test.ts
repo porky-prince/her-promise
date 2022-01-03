@@ -1,5 +1,5 @@
 import './register';
-import { Promise } from '../src/promise';
+import '../build/her-promise';
 
 function delay<T>(time: number = 0, args?: T, isReject: boolean = false): Promise<T> {
 	return new Promise((resolve, reject) => {
@@ -20,15 +20,6 @@ function notExec(): void {
 }
 
 describe('Promise test', () => {
-	test('global promise is undefined', () => {
-		if (typeof window === 'object') {
-			expect(window.Promise).toBe(undefined);
-		}
-		if (typeof global === 'object') {
-			expect(global.Promise).toBe(undefined);
-		}
-	});
-
 	test('resolve test', done => {
 		delay(100, 1).then(value => {
 			expect(value).toBe(1);
