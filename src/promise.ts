@@ -223,6 +223,6 @@ export class Promise<T> {
 	catch<TResult = never>(
 		onRejected?: ((reason: any) => PromiseLike<TResult> | TResult) | undefined | null
 	): Promise<T | TResult> {
-		return new Promise<T | TResult>((resolve, reject) => {});
+		return this.then(void 0, onRejected);
 	}
 }
