@@ -1,7 +1,7 @@
 import './register';
 import '../build/her-promise';
 
-function delay<T>(time: number = 0, args?: T, isReject: boolean = false): Promise<T> {
+function delay(time: number = 0, args?: any, isReject: boolean = false): Promise<any> {
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
 			isReject ? reject(args) : resolve(args);
@@ -9,7 +9,7 @@ function delay<T>(time: number = 0, args?: T, isReject: boolean = false): Promis
 	});
 }
 
-function late<T>(args?: T, isReject: boolean = false): Promise<T> {
+function late(args?: any, isReject: boolean = false): Promise<any> {
 	return new Promise((resolve, reject) => {
 		isReject ? reject(args) : resolve(args);
 	});

@@ -12,6 +12,10 @@ interface IResolve<T> {
 	(value?: T | PromiseLike<T>): void;
 }
 
+interface IResolveValue<T> {
+	(value?: T): void;
+}
+
 interface IReject {
 	(reason?: any): void;
 }
@@ -26,7 +30,7 @@ function isFunc<T>(arg: T): boolean {
 }
 
 function onThen<T>(
-	func: Function,
+	func: Function | undefined | null,
 	args: any,
 	p: Promise<T>,
 	resolve: IResolve<T>,
@@ -34,6 +38,9 @@ function onThen<T>(
 	noFunc: IResolve<T> | IReject
 ): void {
 	if (!isFunc(func)) {
+		if (noFunc === reject) {
+			console.error('Uncaught (in promise) ' + args);
+		}
 		// If onFulfilled is not a function, it must be ignored.
 		// If onRejected is not a function, it must be ignored.
 		noFunc(args);
@@ -41,7 +48,7 @@ function onThen<T>(
 	}
 	let arg;
 	try {
-		arg = func(args);
+		arg = (func as Function)(args);
 	} catch (err: any) {
 		reject(err);
 		return;
@@ -55,8 +62,8 @@ function onThen<T>(
 
 function tryThen<T>(
 	then: Function,
-	arg: T | PromiseLike<T>,
-	resolve: IResolve<T>,
+	arg: T | PromiseLike<T> | undefined,
+	resolve: IResolveValue<T>,
 	reject: IReject
 ): void {
 	callLate(() => {
@@ -88,7 +95,11 @@ function tryThen<T>(
 	});
 }
 
-function callThen<T>(arg: T | PromiseLike<T>, resolve: IResolve<T>, reject: IReject): void {
+function callThen<T>(
+	arg: T | PromiseLike<T> | undefined,
+	resolve: IResolveValue<T>,
+	reject: IReject
+): void {
 	if (isObjOrFunc(arg)) {
 		let then;
 		try {
@@ -102,25 +113,26 @@ function callThen<T>(arg: T | PromiseLike<T>, resolve: IResolve<T>, reject: IRej
 			if (arg instanceof Promise) {
 				then.call(arg, resolve, reject);
 			} else {
+				// “thenable” is an object or function that defines a then method.
 				tryThen(then, arg, resolve, reject);
 			}
 			return;
 		}
 	}
-	resolve(arg);
+	resolve(arg as T | undefined);
 }
 
 export class Promise<T> {
 	// When pending, a promise: may transition to either the fulfilled or rejected state.
 	private _state: string = Pending;
-	private _value: T = undefined;
+	private _value: T | undefined = undefined;
 	private _reason: any = undefined;
 	private _resolves: Function[] = [];
 	private _rejects: Function[] = [];
 
 	constructor(executor: (resolve: IResolve<T>, reject: IReject) => void) {
 		const resolves = this._resolves;
-		const resolve: IResolve<T> = (value?: T): void => {
+		const resolve: IResolveValue<T> = (value?: T): void => {
 			// When fulfilled, a promise: must not transition to any other state.
 			if (this._state === Pending) {
 				// Must have a value, which must not change.
@@ -146,7 +158,6 @@ export class Promise<T> {
 				this._reason = reason;
 				const length = rejects.length;
 				if (length === 0) {
-					// console.warn('Uncaught (in promise) ' + reason);
 					return;
 				}
 				for (let i = 0; i < length; ++i) {
