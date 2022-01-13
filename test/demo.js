@@ -9,12 +9,12 @@
 function delay() {
 	return new Promise((resolve, reject) => {
 		// resolve(111);
-		resolve({
+		/*resolve({
 			then: function (a) {
 				a(222);
 				throw new Error('haha');
 			},
-		});
+		});*/
 		/*resolve(
 			new Promise((resolve1, reject1) => {
 				setTimeout(() => {
@@ -22,39 +22,47 @@ function delay() {
 				}, 100);
 			})
 		);*/
-		/*setTimeout(() => {
-			console.log(1);
-			resolve(111);
-			isDone = true;
+		setTimeout(() => {
+			console.log(333);
+			reject(111);
+			/*isDone = true;
 			resolve(
 				new Promise((resolve1, reject1) => {
 					setTimeout(() => {
 						reject1(111);
 					}, 1000);
 				})
-			);
-		}, 100);*/
+			);*/
+		}, 100);
 	});
 }
 
 /*delay().then((value) => {
 	console.log(value);
 });*/
-let p = delay().then(value => {
+/*let p = delay().then(value => {
 	console.log(value);
 });
 
 setTimeout(() => {
-	/*p.catch(reason => {
+	/!*p.catch(reason => {
 		console.log(reason);
-	});*/
-	/*p.then(value => {
+	});*!/
+	/!*p.then(value => {
 		console.log(3);
 		console.log(typeof value);
 		return 222;
 	}).then(value => {
 		console.log(5);
 		console.log(value);
-	});*/
+	});*!/
 	console.log(p);
-}, 1000);
+}, 1000);*/
+
+/*Promise.all([1, 'aa', true, delay(), undefined, null, delay(), delay()]).then(result => {
+	console.log(result);
+});*/
+
+Promise.race([Promise.resolve(111), Promise.reject(222)]).then(result => {
+	console.log(result);
+});
