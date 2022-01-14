@@ -2,3 +2,7 @@ const globalObj = typeof window === 'object' ? window : typeof global === 'objec
 if (typeof globalObj.Promise !== 'function') {
 	globalObj.Promise = require('./promise').Promise;
 }
+
+require('./finally');
+require('./allSettled');
+require('./any');

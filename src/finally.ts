@@ -1,7 +1,13 @@
-Promise.aaa = () => {};
+import { defineProp, isFunc } from './utils';
 
-Object.defineProperty(Promise.prototype, 'finally', {
-	value: function () {},
+defineProp(Promise.prototype, 'finally', function <
+	T
+>(this: Promise<T>, onfinally?: (() => void) | undefined | null): Promise<T> {
+	return this.then(
+		value => Promise.resolve(isFunc(onfinally) ? onfinally() : onfinally).then(() => value),
+		reason =>
+			Promise.resolve(isFunc(onfinally) ? onfinally() : onfinally).then(() => {
+				throw reason;
+			})
+	);
 });
-
-module.exports.b = 1;

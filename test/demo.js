@@ -63,6 +63,8 @@ setTimeout(() => {
 	console.log(result);
 });*/
 
-Promise.race([Promise.resolve(111), Promise.reject(222)]).then(result => {
-	console.log(result);
-});
+Promise.race([Promise.resolve(111), Promise.reject(222)])
+	.then(result => {
+		console.log(result);
+	})
+	.finally();

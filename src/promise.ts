@@ -1,4 +1,5 @@
 import callLate from 'calllate';
+import { isArr, isFunc, isObjOrFunc } from './utils';
 
 /**
  * Promise States
@@ -18,24 +19,6 @@ interface IResolveValue<T> {
 
 interface IReject {
 	(reason?: any): void;
-}
-
-function isObjOrFunc<T>(arg: T): boolean {
-	const type: string = typeof arg;
-	return arg !== null && (type === 'object' || type === 'function');
-}
-
-function isFunc<T>(arg: T): boolean {
-	return typeof arg === 'function';
-}
-
-let isArr: (arg: any) => arg is any[];
-if (isFunc(Array.isArray)) {
-	isArr = Array.isArray;
-} else {
-	isArr = function (arg: any): arg is any[] {
-		return Object.prototype.toString.call(arg) === '[object Array]';
-	};
 }
 
 function onThen<T>(
