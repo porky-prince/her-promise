@@ -48,6 +48,33 @@ describe('Promise base test', () => {
 				done();
 			});
 	});
+
+	test('finally after then', done => {
+		delay(100, 1)
+			.then(value => delay(10, ++value))
+			.catch(notExec)
+			.finally(() => {
+				expect(1).toBe(1);
+			})
+			.then(value => {
+				expect(value).toBe(2);
+				done();
+			})
+			.catch(notExec);
+	});
+
+	test('catch after finally', done => {
+		delay(100, 'test', true)
+			.then(notExec)
+			.finally(() => {
+				expect(1).toBe(1);
+			})
+			.then(notExec)
+			.catch(reason => {
+				expect(reason).toBe('test');
+				done();
+			});
+	});
 });
 
 describe('Promise static method test', () => {

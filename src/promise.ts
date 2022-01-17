@@ -297,6 +297,7 @@ export class Promise<T> {
 	 * @returns A promise whose internal state matches the provided promise.
 	 */
 	static resolve<T>(value?: T | PromiseLike<T>): Promise<T> {
+		if (value instanceof Promise) return value;
 		return new Promise<T>(resolve => resolve(value));
 	}
 }
