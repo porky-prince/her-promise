@@ -25,19 +25,22 @@ defineProp(Promise, 'allSettled', function <T extends readonly unknown[] | []>(v
 			} else {
 				p = Promise.resolve(values[i]);
 			}
-			p.then(value => {
-				results[i] = {
-					status: 'fulfilled',
-					value,
-				};
-				allDone();
-			}).catch(reason => {
-				results[i] = {
-					status: 'rejected',
-					reason,
-				};
-				allDone();
-			});
+			p.then(
+				value => {
+					results[i] = {
+						status: 'fulfilled',
+						value,
+					};
+					allDone();
+				},
+				reason => {
+					results[i] = {
+						status: 'rejected',
+						reason,
+					};
+					allDone();
+				}
+			);
 		}
 	});
 });

@@ -8,6 +8,18 @@ interface Promise<T> {
 	finally(onfinally?: (() => void) | undefined | null): Promise<T>;
 }
 
+interface AggregateError extends Error {
+	errors: any[];
+}
+
+interface AggregateErrorConstructor {
+	new (errors: Iterable<any>, message?: string): AggregateError;
+	(errors: Iterable<any>, message?: string): AggregateError;
+	readonly prototype: AggregateError;
+}
+
+declare var AggregateError: AggregateErrorConstructor;
+
 interface PromiseConstructor {
 	/**
 	 * Creates a Promise that is resolved with an array of results when all

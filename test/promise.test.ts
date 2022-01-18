@@ -156,4 +156,56 @@ describe('Promise static method test', () => {
 			done();
 		});
 	});
+
+	test('Promise.allSettled all done', done => {
+		Promise.allSettled([1, 'test', true, delay(50, 2), undefined, null, delay(10, 3)]).then(
+			values => {
+				expect(values).toEqual(
+					[1, 'test', true, 2, undefined, null, 3].map(value => {
+						return {
+							status: 'fulfilled',
+							value,
+						};
+					})
+				);
+				done();
+			}
+		);
+	});
+
+	test('Promise.allSettled some rejected', done => {
+		Promise.allSettled([1, delay(50, 'test', true), 3]).then(values => {
+			expect(values).toEqual([
+				{
+					status: 'fulfilled',
+					value: 1,
+				},
+				{
+					status: 'rejected',
+					reason: 'test',
+				},
+				{
+					status: 'fulfilled',
+					value: 3,
+				},
+			]);
+			done();
+		}, notExec);
+	});
+
+	test('Promise.allSettled all rejected', done => {
+		Promise.allSettled([delay(50, 1, true), delay(10, 2, true)]).then(values => {
+			expect(values).toEqual([
+				{
+					status: 'rejected',
+					reason: 1,
+				},
+				{
+					status: 'rejected',
+					reason: 2,
+				},
+			]);
+			done();
+		}, notExec);
+	});
 });
