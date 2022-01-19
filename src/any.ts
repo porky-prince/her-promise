@@ -1,16 +1,17 @@
 import { defineProp, isArr } from './utils';
 
-let AggregateErr: AggregateErrorConstructor;
+let $AggregateErr: AggregateErrorConstructor;
 if (typeof AggregateError === 'function') {
-	AggregateErr = AggregateError;
+	$AggregateErr = AggregateError;
 } else {
-	// @ts-ignore
-	AggregateErr = class extends Error {
+	$AggregateErr = class extends Error {
 		constructor(public errors: any[], message: string = 'All promises were rejected.') {
 			super(message);
 		}
 	};
 }
+
+export const AggregateErr = $AggregateErr;
 
 defineProp(Promise, 'any', function <T extends readonly unknown[] | []>(values: T): Promise<
 	Awaited<T[number]>
@@ -22,7 +23,7 @@ defineProp(Promise, 'any', function <T extends readonly unknown[] | []>(values: 
 		const length: number = values.length;
 		const reasons = new Array(0);
 		if (length === 0) {
-			return reject(new AggregateErr(reasons));
+			return reject(new $AggregateErr(reasons));
 		}
 
 		let count: number = 0;
@@ -36,7 +37,7 @@ defineProp(Promise, 'any', function <T extends readonly unknown[] | []>(values: 
 			p.then(resolve as any, reason => {
 				reasons.push(reason);
 				if (++count === length) {
-					reject(new AggregateErr(reasons));
+					reject(new $AggregateErr(reasons));
 				}
 			});
 		}

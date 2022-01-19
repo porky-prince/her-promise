@@ -208,4 +208,22 @@ describe('Promise static method test', () => {
 			done();
 		}, notExec);
 	});
+
+	test('Promise.any export AggregateError', () => {
+		expect(typeof AggregateError).toBe('function');
+	});
+
+	test('Promise.any any resolve', done => {
+		Promise.any([delay(50, 1, true), 2, delay(10, 3, true)]).then(value => {
+			expect(value).toBe(2);
+			done();
+		}, notExec);
+	});
+
+	test('Promise.any all rejected', done => {
+		Promise.any([delay(50, 1, true), delay(10, 2, true)]).then(notExec, reason => {
+			expect(reason.errors).toEqual([2, 1]);
+			done();
+		});
+	});
 });
