@@ -2,7 +2,7 @@
 const path = require('path');
 const BuildDir = path.join(__dirname, 'build');
 
-module.exports = {
+const config = {
 	mode: 'development',
 	devtool: 'source-map',
 	entry: {
@@ -23,4 +23,13 @@ module.exports = {
 	resolve: {
 		extensions: ['.ts', '.js'],
 	},
+};
+
+module.exports = function () {
+	if (process.argv[3]) {
+		delete config.mode;
+		delete config.devtool;
+		config.output.filename = config.output.filename.replace('.js', '.min.js');
+	}
+	return config;
 };

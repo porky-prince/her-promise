@@ -1,12 +1,22 @@
 {
 	"name": "her-promise",
-	"version": "0.0.1",
-	"description": "This is a polyfill of the ES6 Promise.",
+	"version": "0.1.0",
+	"description": "This is a polyfill of the ES6/ES9/ES11/ES12 Promise.",
 	"keywords": [
-		"promise"
+		"es6",
+		"promise",
+		"finally",
+		"allSettled",
+		"any"
 	],
 	"author": "Porky Ke",
 	"license": "MIT",
+	"main": "build/her-promise.js",
+	"files": [
+		"build",
+		"src",
+		"her-promise.d.ts"
+	],
 	"scripts": {
 		"lint:prettier": "prettier \"{**/*,*}.{js,ts,json,md}\" -l",
 		"lint:code": "eslint --cache \"{**/*,*}.ts\"",
@@ -14,8 +24,8 @@
 		"pretest": "echo \"npm run lint\"",
 		"commitlint": "commitlint --from=master",
 		"start": "webpack --watch",
-		"build": "echo dist",
-		"compile": "webpack",
+		"prod": "webpack --mode production",
+		"dev": "webpack",
 		"test:base": "promises-aplus-tests test/base.js",
 		"test:log": "promises-aplus-tests test/base.js > test.log",
 		"test:demo": "node test/demo.js",

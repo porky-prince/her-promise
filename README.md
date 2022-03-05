@@ -4,14 +4,26 @@
 
 # her-promise
 
-> This is a polyfill of the ES6 Promise.
+> This is a polyfill of the ES6/ES9/ES11/ES12 Promise.
 
 ## Install
+
+npm:
+
+```sh
+$ npm install --save her-promise
+```
+
+yarn:
+
+```sh
+$ yarn add her-promise
+```
 
 ### Browser
 
 ```html
-<script src="herPromise.js"></script>
+<script src="her-promise.js"></script>
 ```
 
 ## Usage
@@ -22,13 +34,66 @@
 
 ```html
 <script>
-	herPromise('args');
+	new Promise((resolve, reject) => {
+		reject();
+	}).finally(() => {
+		// ...
+	});
+
+	Promise.race([
+		// ...
+	]).then(() => {
+		// ...
+	});
+
+	Promise.allSettled([
+		// ...
+	]).then(() => {
+		// ...
+	});
+
+	Promise.any([
+		// ...
+	]).then(() => {
+		// ...
+	});
 </script>
+```
+
+#### Using in es6 or typescript
+
+```js
+// You can import in entry file at first
+import 'her-promise';
+
+new Promise((resolve, reject) => {
+	reject();
+}).finally(() => {
+	// ...
+});
+
+Promise.race([
+	// ...
+]).then(() => {
+	// ...
+});
+
+Promise.allSettled([
+	// ...
+]).then(() => {
+	// ...
+});
+
+Promise.any([
+	// ...
+]).then(() => {
+	// ...
+});
 ```
 
 ## License
 
-[MIT © PorkyKe](./LICENSE)
+[MIT © Porky Ke](./LICENSE)
 
 [npm]: https://img.shields.io/npm/v/her-promise.svg
 [npm-url]: https://npmjs.com/package/her-promise
