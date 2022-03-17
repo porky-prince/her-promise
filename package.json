@@ -25,7 +25,7 @@
 		"commitlint": "commitlint --from=master",
 		"start": "webpack --watch",
 		"prod": "webpack --mode production",
-		"dev": "webpack",
+		"dev": "eslint --fix \"src/allSettled.ts\"",
 		"test:base": "promises-aplus-tests test/base.js",
 		"test:log": "promises-aplus-tests test/base.js > test.log",
 		"test:demo": "node test/demo.js",
