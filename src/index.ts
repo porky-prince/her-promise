@@ -5,4 +5,4 @@ if (typeof globalObj.Promise !== 'function') {
 
 require('./finally');
 require('./allSettled');
-globalObj.AggregateError = require('./any').AggregateErr;
+globalObj.AggregateError = require('./any').$AggregateError;

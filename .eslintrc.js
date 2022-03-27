@@ -17,6 +17,11 @@ module.exports = {
 		'@typescript-eslint/no-floating-promises': 'off',
 		'@typescript-eslint/no-unsafe-assignment': 'off',
 		'@typescript-eslint/promise-function-async': 'off',
+		'@typescript-eslint/no-confusing-void-expression': 'off',
+		'@typescript-eslint/no-require-imports': 'off',
+		'@typescript-eslint/no-var-requires': 'off',
+		'@typescript-eslint/naming-convention': 'off',
+		'@typescript-eslint/ban-types': 'off',
 		'@typescript-eslint/object-curly-spacing': ['error', 'always']
 	},
 	overrides: []

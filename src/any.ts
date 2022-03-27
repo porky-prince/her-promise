@@ -1,47 +1,50 @@
 import { defineProp, isArr } from './utils';
 
-let $AggregateErr: AggregateErrorConstructor;
+export let $AggregateError: AggregateErrorConstructor;
 if (typeof AggregateError === 'function') {
-	$AggregateErr = AggregateError;
+	$AggregateError = AggregateError;
 } else {
-	$AggregateErr = class extends Error {
-		constructor(public errors: any[], message: string = 'All promises were rejected.') {
+	$AggregateError = class extends Error {
+		constructor(public errors: any[], message = 'All promises were rejected.') {
 			super(message);
 		}
 	};
 }
 
-export const AggregateErr = $AggregateErr;
-
 defineProp(
 	Promise,
 	'any',
-	<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>> => {
-		return new Promise((resolve, reject) => {
+	<T>(values: Iterable<T | PromiseLike<T>>): Promise<T> =>
+		new Promise((resolve, reject) => {
 			if (!isArr(values)) {
-				return reject(new TypeError('The arguments must be Array.'));
-			}
-			const length: number = values.length;
-			const reasons = new Array(0);
-			if (length === 0) {
-				return reject(new $AggregateErr(reasons));
+				reject(new TypeError('The arguments must be Array.'));
+				return;
 			}
 
-			let count: number = 0;
+			const { length } = values;
+			const reasons = new Array(0);
+			if (length === 0) {
+				reject(new $AggregateError(reasons));
+				return;
+			}
+
+			let count = 0;
+			function onReject(reason: any): void {
+				reasons.push(reason);
+				if (++count === length) {
+					reject(new $AggregateError(reasons));
+				}
+			}
+
 			for (let i = 0; i < length; ++i) {
-				let p: Promise<unknown>;
-				if ((values[i] as unknown) instanceof Promise) {
+				let p: Promise<T>;
+				if (values[i] instanceof Promise) {
 					p = values[i];
 				} else {
 					p = Promise.resolve(values[i]);
 				}
-				p.then(resolve as any, reason => {
-					reasons.push(reason);
-					if (++count === length) {
-						reject(new $AggregateErr(reasons));
-					}
-				});
+
+				p.then(resolve, onReject);
 			}
-		});
-	}
+		})
 );

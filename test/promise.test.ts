@@ -134,7 +134,7 @@ describe('Promise static method test', () => {
 			delay(50, 2, true),
 			undefined,
 			delay(10, 3, true),
-			null,
+			null
 		]).then(notExec, reason => {
 			expect(reason).toBe(3);
 			done();
@@ -164,7 +164,7 @@ describe('Promise static method test', () => {
 					[1, 'test', true, 2, undefined, null, 3].map(value => {
 						return {
 							status: 'fulfilled',
-							value,
+							value
 						};
 					})
 				);
@@ -178,16 +178,16 @@ describe('Promise static method test', () => {
 			expect(values).toEqual([
 				{
 					status: 'fulfilled',
-					value: 1,
+					value: 1
 				},
 				{
 					status: 'rejected',
-					reason: 'test',
+					reason: 'test'
 				},
 				{
 					status: 'fulfilled',
-					value: 3,
-				},
+					value: 3
+				}
 			]);
 			done();
 		}, notExec);
@@ -198,12 +198,12 @@ describe('Promise static method test', () => {
 			expect(values).toEqual([
 				{
 					status: 'rejected',
-					reason: 1,
+					reason: 1
 				},
 				{
 					status: 'rejected',
-					reason: 2,
-				},
+					reason: 2
+				}
 			]);
 			done();
 		}, notExec);

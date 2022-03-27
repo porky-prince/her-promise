@@ -5,22 +5,17 @@ import { isArr, isFunc, isObjOrFunc } from './utils';
  * Promise States
  * A promise must be in one of three states: pending, fulfilled, or rejected.
  */
-const Pending: string = 'pending';
-const Fulfilled: string = 'fulfilled';
-const Rejected: string = 'rejected';
+const Pending = 'pending';
+const Fulfilled = 'fulfilled';
+const Rejected = 'rejected';
 
-interface IResolve<T> {
-	(value?: T | PromiseLike<T>): void;
-}
+type IResolve<T> = (value?: T | PromiseLike<T>) => void;
 
-interface IResolveValue<T> {
-	(value?: T): void;
-}
+type IResolveValue<T> = (value?: T) => void;
 
-interface IReject {
-	(reason?: any): void;
-}
+type IReject = (reason?: any) => void;
 
+/* eslint max-params: "off" */
 function onThen<T>(
 	func: Function | undefined | null,
 	args: any,
@@ -31,24 +26,28 @@ function onThen<T>(
 ): void {
 	if (!isFunc(func)) {
 		if (noFunc === reject) {
-			console.error('Uncaught (in promise) ' + args);
+			console.error(`Uncaught (in promise) ${String(args)}`);
 		}
+
 		// If onFulfilled is not a function, it must be ignored.
 		// If onRejected is not a function, it must be ignored.
 		noFunc(args);
 		return;
 	}
+
 	let arg;
 	try {
-		arg = (func as Function)(args);
-	} catch (err: any) {
+		arg = func(args);
+	} catch (err: unknown) {
 		reject(err);
 		return;
 	}
+
 	if (arg === p) {
 		reject(new TypeError('Chaining cycle detected for promise #<Promise>'));
 		return;
 	}
+
 	callThen<T>(arg, resolve, reject);
 }
 
@@ -59,7 +58,7 @@ function tryThen<T>(
 	reject: IReject
 ): void {
 	callLate(() => {
-		let once: boolean = false;
+		let once = false;
 		try {
 			then.call(
 				arg,
@@ -67,6 +66,7 @@ function tryThen<T>(
 					if (once) {
 						return;
 					}
+
 					once = true;
 					callThen(value, resolve, reject);
 				},
@@ -74,11 +74,12 @@ function tryThen<T>(
 					if (once) {
 						return;
 					}
+
 					once = true;
 					reject(reason);
 				}
 			);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			if (!once) {
 				once = true;
 				reject(err);
@@ -97,10 +98,11 @@ function callThen<T>(
 		try {
 			// If retrieving the property x.then results in a thrown exception e, reject promise with e as the reason.
 			then = (arg as PromiseLike<T>).then;
-		} catch (err: any) {
+		} catch (err: unknown) {
 			reject(err);
 			return;
 		}
+
 		if (isFunc(then)) {
 			if (arg instanceof Promise) {
 				then.call(arg, resolve, reject);
@@ -108,19 +110,116 @@ function callThen<T>(
 				// “thenable” is an object or function that defines a then method.
 				tryThen(then, arg, resolve, reject);
 			}
+
 			return;
 		}
 	}
+
 	resolve(arg as T | undefined);
 }
 
 export class Promise<T> {
+	/**
+	 * Creates a Promise that is resolved with an array of results when all of the provided Promises
+	 * resolve, or rejected when any Promise is rejected.
+	 * @param values An array of Promises.
+	 * @returns A new Promise.
+	 */
+	static all<T extends readonly unknown[] | []>(
+		values: T
+	): Promise<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
+		return new Promise((resolve, reject) => {
+			if (!isArr(values)) {
+				return reject(new TypeError('The arguments must be Array.'));
+			}
+
+			const { length } = values;
+			const results = new Array(length);
+			if (length === 0) {
+				return resolve(results as any);
+			}
+
+			let count = 0;
+			let isReject = false;
+			function onResolve<V>(value: V, i: number): void {
+				if (isReject) {
+					return;
+				}
+
+				results[i] = value;
+				if (++count === length) {
+					resolve(results as any);
+				}
+			}
+
+			function onReject(reason: any): void {
+				if (isReject) {
+					return;
+				}
+
+				isReject = true;
+				reject(reason);
+			}
+
+			for (let i = 0; !isReject && i < length; ++i) {
+				callThen(values[i], value => onResolve(value, i), onReject);
+			}
+		});
+	}
+
+	/**
+	 * Creates a Promise that is resolved or rejected when any of the provided Promises are resolved
+	 * or rejected.
+	 * @param values An array of Promises.
+	 * @returns A new Promise.
+	 */
+	static race<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>> {
+		return new Promise((resolve, reject) => {
+			if (!isArr(values)) {
+				return reject(new TypeError('The arguments must be Array.'));
+			}
+
+			const { length } = values;
+			for (let i = 0; i < length; ++i) {
+				callThen(values[i], resolve, reject);
+			}
+		});
+	}
+
+	/**
+	 * Creates a new rejected promise for the provided reason.
+	 * @param reason The reason the promise was rejected.
+	 * @returns A new rejected Promise.
+	 */
+	static reject<T = never>(reason?: any): Promise<T> {
+		return new Promise<T>((resolve, reject) => reject(reason));
+	}
+
+	/**
+	 * Creates a new resolved promise.
+	 * @returns A resolved promise.
+	 */
+	static resolve(): Promise<void>;
+
+	/**
+	 * Creates a new resolved promise for the provided value.
+	 * @param value A promise.
+	 * @returns A promise whose internal state matches the provided promise.
+	 */
+	static resolve<T>(value?: T | PromiseLike<T>): Promise<T> {
+		if (value instanceof Promise) {
+			return value;
+		}
+
+		return new Promise<T>(resolve => resolve(value));
+	}
+
 	// When pending, a promise: may transition to either the fulfilled or rejected state.
 	private _state: string = Pending;
 	private _value: T | undefined = undefined;
 	private _reason: any = undefined;
-	private _resolves: Function[] = [];
-	private _rejects: Function[] = [];
+	private readonly _resolves: Function[] = [];
+	private readonly _rejects: Function[] = [];
 
 	constructor(executor: (resolve: IResolve<T>, reject: IReject) => void) {
 		const resolves = this._resolves;
@@ -130,13 +229,15 @@ export class Promise<T> {
 				// Must have a value, which must not change.
 				this._state = Fulfilled;
 				this._value = value;
-				const length = resolves.length;
+				const { length } = resolves;
 				if (length === 0) {
 					return;
 				}
+
 				for (let i = 0; i < length; ++i) {
 					resolves[i]();
 				}
+
 				resolves.length = 0;
 			}
 		};
@@ -145,16 +246,18 @@ export class Promise<T> {
 		const reject: IReject = (reason?: any): void => {
 			// When rejected, a promise: must not transition to any other state.
 			if (this._state === Pending) {
-				// must have a reason, which must not change.
+				// Must have a reason, which must not change.
 				this._state = Rejected;
 				this._reason = reason;
-				const length = rejects.length;
+				const { length } = rejects;
 				if (length === 0) {
 					return;
 				}
+
 				for (let i = 0; i < length; ++i) {
 					rejects[i]();
 				}
+
 				rejects.length = 0;
 			}
 		};
@@ -163,7 +266,7 @@ export class Promise<T> {
 			executor((value?: T | PromiseLike<T>): void => {
 				callThen<T>(value, resolve, reject);
 			}, reject);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			reject(err);
 		}
 	}
@@ -215,89 +318,6 @@ export class Promise<T> {
 	catch<TResult = never>(
 		onRejected?: ((reason: any) => PromiseLike<TResult> | TResult) | undefined | null
 	): Promise<T | TResult> {
-		return this.then(void 0, onRejected);
-	}
-
-	/**
-	 * Creates a Promise that is resolved with an array of results when all of the provided Promises
-	 * resolve, or rejected when any Promise is rejected.
-	 * @param values An array of Promises.
-	 * @returns A new Promise.
-	 */
-	static all<T extends readonly unknown[] | []>(
-		values: T
-	): Promise<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
-		return new Promise((resolve, reject) => {
-			if (!isArr(values)) {
-				return reject(new TypeError('The arguments must be Array.'));
-			}
-			const length: number = values.length;
-			const results = new Array(length);
-			if (length === 0) {
-				return resolve(results as any);
-			}
-			let count: number = 0;
-			let isReject: boolean = false;
-			for (let i = 0; !isReject && i < length; ++i) {
-				callThen(
-					values[i],
-					value => {
-						if (isReject) return;
-						results[i] = value;
-						if (++count === length) {
-							resolve(results as any);
-						}
-					},
-					reason => {
-						if (isReject) return;
-						isReject = true;
-						reject(reason);
-					}
-				);
-			}
-		});
-	}
-
-	/**
-	 * Creates a Promise that is resolved or rejected when any of the provided Promises are resolved
-	 * or rejected.
-	 * @param values An array of Promises.
-	 * @returns A new Promise.
-	 */
-	static race<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>> {
-		return new Promise((resolve, reject) => {
-			if (!isArr(values)) {
-				return reject(new TypeError('The arguments must be Array.'));
-			}
-			const length: number = values.length;
-			for (let i = 0; i < length; ++i) {
-				callThen(values[i], resolve, reject);
-			}
-		});
-	}
-
-	/**
-	 * Creates a new rejected promise for the provided reason.
-	 * @param reason The reason the promise was rejected.
-	 * @returns A new rejected Promise.
-	 */
-	static reject<T = never>(reason?: any): Promise<T> {
-		return new Promise<T>((resolve, reject) => reject(reason));
-	}
-
-	/**
-	 * Creates a new resolved promise.
-	 * @returns A resolved promise.
-	 */
-	static resolve(): Promise<void>;
-
-	/**
-	 * Creates a new resolved promise for the provided value.
-	 * @param value A promise.
-	 * @returns A promise whose internal state matches the provided promise.
-	 */
-	static resolve<T>(value?: T | PromiseLike<T>): Promise<T> {
-		if (value instanceof Promise) return value;
-		return new Promise<T>(resolve => resolve(value));
+		return this.then(undefined, onRejected);
 	}
 }

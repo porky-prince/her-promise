@@ -6,23 +6,23 @@ const config = {
 	mode: 'development',
 	devtool: 'source-map',
 	entry: {
-		app: './src/index.ts',
+		app: './src/index.ts'
 	},
 	output: {
 		path: BuildDir,
-		filename: 'her-promise.js',
+		filename: 'her-promise.js'
 	},
 	module: {
 		rules: [
 			{
 				test: /\.ts$/,
-				loader: 'ts-loader',
-			},
-		],
+				loader: 'ts-loader'
+			}
+		]
 	},
 	resolve: {
-		extensions: ['.ts', '.js'],
-	},
+		extensions: ['.ts', '.js']
+	}
 };
 
 module.exports = function () {
