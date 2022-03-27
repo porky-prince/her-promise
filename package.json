@@ -29,7 +29,7 @@
 		"dev": "webpack",
 		"test:base": "promises-aplus-tests test/base.js",
 		"test:log": "promises-aplus-tests test/base.js > test.log",
-		"test:demo": "node test/demo.js",
+		"test:demo": "lint-staged",
 		"test": "jest --transform={\\\"^.+\\\\.test\\\\.tsx?$\\\":\\\"ts-jest\\\"}"
 	},
 	"dependencies": {
