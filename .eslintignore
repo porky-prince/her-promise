@@ -2,4 +2,4 @@ coverage
 node_modules
 build
 test
-her-promise.d.ts
+index.d.ts
